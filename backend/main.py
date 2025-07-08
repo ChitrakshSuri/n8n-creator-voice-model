@@ -3,9 +3,13 @@ from fastapi import FastAPI, UploadFile, File
 from backend.services.llm import ask_llm
 from backend.services.whisper import transcribe_audio
 from backend.services.tts import text_to_speech
+from fastapi.staticfiles import StaticFiles
 import json
 
 app = FastAPI()
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.post("/ask")
 async def ask_question(audio: UploadFile = File(...)):
