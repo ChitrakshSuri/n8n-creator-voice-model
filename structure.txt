@@ -1,0 +1,10 @@
+voice-agent/
+├── frontend/        ← React app (optional for now)
+├── backend/         ← FastAPI server
+│   ├── main.py
+│   ├── services/
+│   │   ├── whisper.py
+│   │   ├── llm.py
+│   │   └── tts.py
+│   └── workflow.json
+└── requirements.txt

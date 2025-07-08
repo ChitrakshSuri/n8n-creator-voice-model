@@ -1,0 +1,185 @@
+{
+  "name": "AI Voice Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "id": "b6f00b0e-c87d-4288-a5c2-0c30c63e6d18",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "chitraksh2.n8n@gmail.com",
+          "mode": "list",
+          "cachedResultName": "chitraksh2.n8n@gmail.com"
+        },
+        "returnAll": true,
+        "timeMax": "={{ $now.plus(24, 'hours') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [220, 0],
+      "id": "c96a5ecc-7da1-4b7d-9623-c08e709b6881",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "3p6OAPrTfv0Y0EM8",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Appointment Description:  {{ $json.description }}\n\nStart Time: {{ $json.start.dateTime }}\n\nEnd Time: {{ $json.end.dateTime }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an assistant. Generate a structured JSON object with the following fields:\n\nname: Full name of the recipient\nphone_number: Phone number as a string\nreason: Reason for the appointment\nstart_time: Start time in ISO 8601 date-time format\nend_time: End time in ISO 8601 date-time format\nemail: Email address of the recipient\n\nReturn the output only in valid JSON format. Do not include any additional text or comments.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "b78346a4-d2cb-443b-b8d9-a45ca65bad3e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [360, 200],
+      "id": "d841dcbf-f7ab-4363-98fd-2597bd550117",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Z0UO0SL3nIf14HKh",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"output\": {\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"phone_number\": \"+1234567890\",\n    \"reason\": \"Weekly check-in\",\n    \"start_time\": \"2025-06-25T10:00:00Z\",\n    \"end_time\": \"2025-06-25T10:30:00Z\"\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [580, 220],
+      "id": "955fc1cd-1944-4a05-b0d7-436fbb1779cf",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"+916230020604\",\n  \"to_number\": \"{{ $json.output.phone_number }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"name\": \"{{ $json.output.name }}\",\n    \"phone_number\": \"{{ $json.output.phone_number }}\",\n    \"reason\": \"{{ $json.output.reason }}\",\n    \"start_time\": \"{{ $json.output.start_time }}\",\n    \"end_time\": \"{{ $json.output.end_time }}\"\n  },\n  \"override_agent_id\": \"agent_a1ea0c18d747a5bf310f4d7d65\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 0],
+      "id": "4ec130a5-684e-4211-bbe1-9f3f823eaa3c",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "j7o3sQBRliOnu0vo",
+          "name": "Custom Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "634bdb67-fadd-427d-831a-fdb77ec8d458",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "02af096bfc61ebf9668bf2fed8ad3ffacd3ff2125a13df50e0cb1f49b2273711"
+  },
+  "id": "2e472OfK7kZhxg7C",
+  "tags": []
+}
