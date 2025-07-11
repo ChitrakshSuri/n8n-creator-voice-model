@@ -3,6 +3,7 @@ import io
 import os
 from dotenv import load_dotenv
 
+# used to extract text from audio files using OpenAI Whisper
 load_dotenv()  # Load variables from .env
 openai.api_key = os.getenv("OPENAI_API_KEY")
 

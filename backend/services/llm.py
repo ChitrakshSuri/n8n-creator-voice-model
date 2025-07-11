@@ -1,5 +1,6 @@
 import openai
 
+# its the core logic that talks to OpenAI GPT-4 to get a response based on the user's voice input and your workflow.json.
 async def ask_llm(query, workflow_context):
     context = f"Workflow: {workflow_context}\nUser asked: {query}"
     res = openai.ChatCompletion.create(

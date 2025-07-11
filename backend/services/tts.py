@@ -7,6 +7,7 @@ import os
 
 load_dotenv()
 
+# it is used to convert text (that llm gives) to speech using ElevenLabs API
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 VOICE_ID = os.getenv("VOICE_ID")
 

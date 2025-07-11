@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 import json
 
 app = FastAPI()
+# Handles audio upload, transcribes it, asks GPT about the n8n workflow, and returns text + voice response
+
 
 # Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
