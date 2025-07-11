@@ -34,7 +34,7 @@ async def text_to_speech(text):
 
     # Save with a unique filename
     filename = f"{uuid.uuid4().hex}.mp3"
-    output_path = Path("frontend/static") / filename
+    output_path = Path("static") / filename
     with open(output_path, "wb") as f:
         f.write(response.content)
 
